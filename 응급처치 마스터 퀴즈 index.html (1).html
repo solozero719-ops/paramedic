@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>응급처치 마스터 퀴즈</title>
+<style>
+  :root {
+    --navy: #1b2a4a;
+    --navy-light: #2e4370;
+    --red: #d7263d;
+    --red-dark: #b01e31;
+    --green: #1e9e5a;
+    --green-bg: #e6f6ee;
+    --red-bg: #fdeaec;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #22304a;
+    --muted: #6b7a94;
+    --border: #dde4ee;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(27, 42, 74, 0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.6;
+  }
+  header.app-header {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  header.app-header .logo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  header.app-header .logo .cross { color: #ff5a6e; }
+  main {
+    width: 100%;
+    max-width: 640px;
+    padding: 20px 16px 48px;
+    flex: 1;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 22px;
+  }
+  .hidden { display: none !important; }
+
+  /* ===== 시작 화면 ===== */
+  .start-emblem {
+    width: 72px; height: 72px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(215, 38, 61, 0.35);
+  }
+  .start-emblem span {
+    color: #fff; font-size: 2.2rem; font-weight: 800; line-height: 1;
+  }
+  h1.title {
+    text-align: center;
+    font-size: 1.6rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  p.subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+  .section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .cat-btn {
+    border: 2px solid var(--border);
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+  .cat-btn .cat-count {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .cat-btn.selected {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: #fff;
+  }
+  .cat-btn.selected .cat-count { color: #c3cde4; }
+  .btn-primary {
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-navy {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-navy:hover { background: var(--navy-light); }
+  .btn-outline {
+    width: 100%;
+    background: #fff;
+    color: var(--navy);
+    border: 2px solid var(--navy);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-outline:hover { background: #eef2f9; }
+
+  /* ===== 퀴즈 진행 화면 ===== */
+  .quiz-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .quiz-cat-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--red);
+    background: var(--red-bg);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--red), #ff5a6e);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  .q-type-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: #e8edf7;
+    border-radius: 6px;
+    padding: 3px 10px;
+    margin-bottom: 12px;
+  }
+  .question-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    word-break: keep-all;
+  }
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 15px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    word-break: keep-all;
+  }
+  .choice-btn .choice-mark {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #eef2f9;
+    color: var(--navy);
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .choice-btn:not(:disabled):hover { border-color: var(--navy); background: #f8faff; }
+  .choice-btn:disabled { cursor: default; }
+  .choice-btn.correct {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .choice-btn.correct .choice-mark { background: var(--green); color: #fff; }
+  .choice-btn.wrong {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+  .choice-btn.wrong .choice-mark { background: var(--red); color: #fff; }
+  .choice-btn.dimmed { opacity: 0.55; }
+
+  .feedback {
+    margin-top: 18px;
+    border-radius: 12px;
+    padding: 16px;
+    animation: fadeUp 0.25s ease;
+  }
+  .feedback.ok { background: var(--green-bg); border: 1.5px solid #bfe6d0; }
+  .feedback.no { background: var(--red-bg); border: 1.5px solid #f3c2c9; }
+  .feedback .verdict {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .feedback.ok .verdict { color: var(--green); }
+  .feedback.no .verdict { color: var(--red); }
+  .feedback .explain { font-size: 0.93rem; color: var(--text); word-break: keep-all; }
+  .next-wrap { margin-top: 16px; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== 결과 화면 ===== */
+  .result-emblem {
+    width: 84px; height: 84px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem;
+    background: #e8edf7;
+  }
+  h2.result-title {
+    text-align: center;
+    font-size: 1.4rem;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .result-msg {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 22px;
+    word-break: keep-all;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-box {
+    background: #f8faff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 6px;
+    text-align: center;
+  }
+  .stat-box .stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--navy);
+  }
+  .stat-box .stat-value.red { color: var(--red); }
+  .stat-box .stat-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .result-actions { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ===== 탐색(이전/처음으로) 버튼 ===== */
+  .nav-row { display: flex; gap: 10px; margin-top: 12px; }
+  .btn-prev {
+    flex: 1;
+    background: #fff;
+    color: var(--navy);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-prev:hover { border-color: var(--navy); background: #f8faff; }
+  .quiz-home-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px 2px;
+    white-space: nowrap;
+  }
+  .quiz-home-btn:hover { color: var(--navy); }
+  .wrong-list { margin-top: 26px; }
+  .wrong-list h3 {
+    font-size: 0.95rem;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .wrong-item {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--red);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 0.88rem;
+  }
+  .wrong-item .wq { font-weight: 700; margin-bottom: 4px; word-break: keep-all; }
+  .wrong-item .wa { color: var(--green); font-weight: 600; }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 480px) {
+    main { padding: 14px 10px 36px; }
+    .card { padding: 22px 16px; }
+    h1.title { font-size: 1.35rem; }
+    .question-text { font-size: 1.05rem; }
+    .choice-btn { font-size: 0.95rem; padding: 14px 12px; }
+    .category-grid { grid-template-columns: 1fr; }
+    .stats-grid { gap: 8px; }
+    .stat-box .stat-value { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo"><span class="cross">✚</span> 응급처치 마스터 퀴즈</div>
+</header>
+
+<main>
+  <!-- ===== 시작 화면 ===== -->
+  <section id="screen-start" class="card">
+    <div class="start-emblem"><span>✚</span></div>
+    <h1 class="title">응급처치 마스터 퀴즈</h1>
+    <p class="subtitle">기본 소생술부터 외상 처치, 환자 평가까지 —<br>퀴즈로 핵심 지식을 점검하고 시험에 대비하세요.</p>
+
+    <div class="section-label">카테고리 선택</div>
+    <div class="category-grid" id="categoryGrid"></div>
+
+    <button class="btn-primary" id="btnStart">퀴즈 시작하기</button>
+  </section>
+
+  <!-- ===== 퀴즈 진행 화면 ===== -->
+  <section id="screen-quiz" class="hidden">
+    <div class="quiz-top">
+      <span class="progress-text" id="progressText">1 / 10</span>
+      <span class="quiz-cat-badge" id="quizCatBadge">전체 문제</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="card">
+      <span class="q-type-tag" id="qTypeTag">객관식</span>
+      <div class="question-text" id="questionText"></div>
+      <div class="choices" id="choices"></div>
+      <div id="feedback" class="hidden"></div>
+      <div class="next-wrap hidden" id="nextWrap">
+        <button class="btn-navy" id="btnNext">다음 문제 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 결과 화면 ===== -->
+  <section id="screen-result" class="card hidden">
+    <div class="result-emblem" id="resultEmblem">🏅</div>
+    <h2 class="result-title">퀴즈 완료!</h2>
+    <p class="result-msg" id="resultMsg"></p>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value" id="statScore">0점</div>
+        <div class="stat-label">획득 점수</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value red" id="statCorrect">0 / 0</div>
+        <div class="stat-label">맞힌 문제</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statRate">0%</div>
+        <div class="stat-label">정답률</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary hidden" id="btnRetryWrong">오답만 다시 풀기</button>
+      <button class="btn-navy" id="btnRestart">처음부터 다시 하기</button>
+      <button class="btn-outline" id="btnHome">카테고리 다시 선택</button>
+    </div>
+
+    <div class="wrong-list hidden" id="wrongList">
+      <h3>📋 틀린 문제 핵심 정리</h3>
+      <div id="wrongItems"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+/* ===================== 문제 데이터 (총 14문항) ===================== */
+const CAT = {
+  ALL: "전체 문제",
+  BLS: "기본 소생술(BLS)",
+  TRAUMA: "외상·출혈 처치",
+  TRIAGE: "중증도 분류·환자 평가"
+};
+
+const QUESTIONS = [
+  /* ---- 기본 소생술(BLS) : 5문항 ---- */
+  {
+    cat: "BLS", type: "mc",
+    q: "성인 심폐소생술(CPR) 시 가슴압박의 올바른 깊이와 속도는?",
+    choices: [
+      "약 3cm 깊이, 분당 60~80회",
+      "약 5cm 깊이, 분당 100~120회",
+      "약 7cm 깊이, 분당 140회 이상",
+      "약 2cm 깊이, 분당 100회"
+    ],
+    answer: 1,
+    explain: "성인 가슴압박은 약 5cm(최대 6cm) 깊이로, 분당 100~120회의 속도로 시행합니다. 압박 후에는 가슴이 완전히 이완되도록 해야 합니다."
+  },
+  {
+    cat: "BLS", type: "mc",
+    q: "심정지가 의심되는 성인을 발견했을 때 가장 먼저 해야 할 행동은?",
+    choices: [
+      "즉시 가슴압박을 시작한다",
+      "입안의 이물질을 확인한다",
+      "현장 안전을 확인하고 반응(의식)을 확인한다",
+      "인공호흡을 2회 실시한다"
+    ],
+    answer: 2,
+    explain: "기본소생술의 첫 단계는 현장 안전 확인 → 반응 확인 → 119 신고 및 AED 요청 → 호흡 확인 → 가슴압박 순입니다. 구조자 자신의 안전이 항상 우선입니다."
+  },
+  {
+    cat: "BLS", type: "mc",
+    q: "성인 심폐소생술에서 가슴압박과 인공호흡의 비율은?",
+    choices: [
+      "15 : 2",
+      "30 : 2",
+      "5 : 1",
+      "10 : 2"
+    ],
+    answer: 1,
+    explain: "성인 CPR에서 가슴압박 대 인공호흡 비율은 30:2입니다. 인공호흡이 어려운 일반인 구조자는 가슴압박만 지속하는 '가슴압박 소생술'을 시행할 수 있습니다."
+  },
+  {
+    cat: "BLS", type: "ox",
+    q: "자동심장충격기(AED)는 패드 부착 후 심장 리듬을 분석하는 동안 환자에게서 손을 떼야 한다.",
+    choices: ["O", "X"],
+    answer: 0,
+    explain: "정답은 O입니다. AED가 심전도 리듬을 분석하는 동안 환자 몸에 접촉하면 분석 오류가 생길 수 있으므로 모두 떨어져야 하며, 충격(제세동) 시에도 접촉하면 안 됩니다."
+  },
+  {
+    cat: "BLS", type: "ox",
+    q: "기도가 완전히 막혀 말을 하지 못하는 성인에게는 등 두드리기나 복부 밀어내기(하임리히법)를 시행한다.",
+    choices: ["O", "X"],
+    answer: 0,
+    explain: "정답은 O입니다. 기침이나 말을 할 수 없는 완전 기도폐쇄 시 복부 밀어내기(하임리히법)를 시행합니다. 환자가 기침할 수 있다면 스스로 뱉어내도록 격려하는 것이 우선입니다."
+  },
+
+  /* ---- 외상·출혈 처치 : 5문항 ---- */
+  {
+    cat: "TRAUMA", type: "mc",
+    q: "팔에서 선홍색 피가 솟구치듯 나오는 동맥성 출혈 환자에게 가장 우선적인 처치는?",
+    choices: [
+      "상처 부위를 심장보다 낮게 내린다",
+      "깨끗한 거즈나 천으로 상처를 직접 압박한다",
+      "지혈제를 뿌리고 기다린다",
+      "상처 부위를 물로 오래 씻어낸다"
+    ],
+    answer: 1,
+    explain: "출혈 처치의 기본이자 가장 효과적인 방법은 '직접 압박'입니다. 깨끗한 거즈나 천으로 상처를 강하게 눌러 지혈하고, 가능하면 상처 부위를 심장보다 높게 올립니다."
+  },
+  {
+    cat: "TRAUMA", type: "mc",
+    q: "화상 환자에 대한 응급처치로 올바른 것은?",
+    choices: [
+      "물집을 터뜨려 소독한다",
+      "버터나 치약을 발라 열을 식힌다",
+      "흐르는 시원한 물로 10분 이상 식힌다",
+      "얼음을 화상 부위에 직접 대고 문지른다"
+    ],
+    answer: 2,
+    explain: "화상 부위는 흐르는 시원한 물(실온 수준)로 10분 이상 식히는 것이 원칙입니다. 얼음 직접 접촉은 조직 손상을 악화시키고, 물집은 터뜨리지 않으며, 민간요법(버터·치약 등)은 감염 위험을 높입니다."
+  },
+  {
+    cat: "TRAUMA", type: "mc",
+    q: "몸에 칼 등 이물질이 깊이 박혀 있는 환자를 발견했을 때 올바른 처치는?",
+    choices: [
+      "이물질을 빠르게 뽑아낸 뒤 압박한다",
+      "이물질을 그대로 두고 주변을 고정하여 움직이지 않게 한다",
+      "이물질을 좌우로 흔들어 상처를 확인한다",
+      "이물질 위를 강하게 직접 압박한다"
+    ],
+    answer: 1,
+    explain: "박힌 이물질은 혈관을 막아 출혈을 억제하고 있을 수 있어 절대 제거하지 않습니다. 이물질 주변에 거즈를 덧대어 움직이지 않게 고정한 상태로 병원으로 이송합니다."
+  },
+  {
+    cat: "TRAUMA", type: "ox",
+    q: "코피가 날 때는 고개를 뒤로 젖히고 콧등 위쪽을 눌러 준다.",
+    choices: ["O", "X"],
+    answer: 1,
+    explain: "정답은 X입니다. 고개를 뒤로 젖히면 혈액이 기도나 위로 넘어갈 수 있습니다. 고개를 약간 앞으로 숙이고 콧방울(코 아래 연한 부분)을 5~10분간 눌러 지혈합니다."
+  },
+  {
+    cat: "TRAUMA", type: "ox",
+    q: "골절이 의심되는 부위는 변형이 있어도 억지로 펴지 말고 발견한 자세 그대로 부목으로 고정한다.",
+    choices: ["O", "X"],
+    answer: 0,
+    explain: "정답은 O입니다. 골절 부위를 억지로 펴면 혈관·신경 손상을 악화시킬 수 있습니다. 발견 당시 자세 그대로, 골절 부위 위아래 관절을 포함해 부목으로 고정합니다."
+  },
+
+  /* ---- 중증도 분류·환자 평가 : 4문항 ---- */
+  {
+    cat: "TRIAGE", type: "mc",
+    q: "다수 사상자 발생 시 중증도 분류(Triage)에서 '긴급(적색)'으로 분류해야 하는 환자는?",
+    choices: [
+      "보행이 가능하고 경미한 찰과상만 있는 환자",
+      "호흡이 없고 기도 개방 후에도 호흡이 돌아오지 않는 환자",
+      "호흡은 있으나 의식이 없고 대량 출혈이 있는 환자",
+      "통증을 호소하지만 활력징후가 안정적인 환자"
+    ],
+    answer: 2,
+    explain: "긴급(적색)은 즉시 처치하면 생존 가능성이 높은 위중한 환자(기도폐쇄, 대량 출혈, 쇼크, 의식장애 등)입니다. 보행 가능한 경상자는 비응급(녹색), 소생 불가능 환자는 지연/사망(흑색)으로 분류합니다."
+  },
+  {
+    cat: "TRIAGE", type: "mc",
+    q: "1차 평가(Primary Survey)에서 확인하는 순서로 올바른 것은?",
+    choices: [
+      "기도(A) → 호흡(B) → 순환(C) → 의식/신경학적 상태(D) → 노출(E)",
+      "호흡(B) → 기도(A) → 노출(E) → 순환(C) → 의식(D)",
+      "순환(C) → 의식(D) → 기도(A) → 호흡(B) → 노출(E)",
+      "노출(E) → 순환(C) → 호흡(B) → 기도(A) → 의식(D)"
+    ],
+    answer: 0,
+    explain: "1차 평가는 ABCDE 순서입니다 — Airway(기도 확보), Breathing(호흡), Circulation(순환·출혈), Disability(의식·신경학적 상태), Exposure(노출·체온 유지). 생명을 위협하는 문제를 발견 즉시 처치하며 진행합니다."
+  },
+  {
+    cat: "TRIAGE", type: "mc",
+    q: "의식 수준 평가 척도인 AVPU에서 'P'가 의미하는 것은?",
+    choices: [
+      "맥박(Pulse)에 반응한다",
+      "통증(Pain) 자극에 반응한다",
+      "자세(Position)를 유지할 수 있다",
+      "동공(Pupil)이 빛에 반응한다"
+    ],
+    answer: 1,
+    explain: "AVPU는 Alert(명료), Verbal(언어 자극에 반응), Pain(통증 자극에 반응), Unresponsive(무반응)의 약자로, 현장에서 빠르게 의식 수준을 평가하는 척도입니다."
+  },
+  {
+    cat: "TRIAGE", type: "ox",
+    q: "쇼크가 의심되는 환자는 피부가 차고 축축하며, 맥박이 빠르고 약하게 나타날 수 있다.",
+    choices: ["O", "X"],
+    answer: 0,
+    explain: "정답은 O입니다. 쇼크의 전형적 징후는 차고 창백하며 축축한 피부, 빠르고 약한 맥박, 빠른 호흡, 의식 저하 등입니다. 환자를 눕히고 보온하며 신속히 119에 신고해야 합니다."
+  }
+];
+
+/* ===================== 상태 ===================== */
+const POINT_PER_Q = 10;
+let selectedCat = "ALL";
+let quizSet = [];        // 현재 출제 문제 배열
+let idx = 0;             // 현재 문제 인덱스
+let userAnswers = [];    // 문제별로 고른 보기 인덱스 (null = 아직 안 품)
+let wrongQuestions = [];
+let isRetryMode = false;
+
+/* ===================== 요소 ===================== */
+const $ = (id) => document.getElementById(id);
+const screens = {
+  start: $("screen-start"),
+  quiz: $("screen-quiz"),
+  result: $("screen-result")
+};
+
+/* ---- 탐색 버튼(이전 문제 · 처음으로) 동적 생성 ---- */
+const navRow = document.createElement("div");
+navRow.className = "nav-row";
+const btnPrev = document.createElement("button");
+btnPrev.type = "button";
+btnPrev.id = "btnPrev";
+btnPrev.className = "btn-prev hidden";
+btnPrev.textContent = "← 이전 문제";
+navRow.appendChild(btnPrev);
+$("nextWrap").insertAdjacentElement("afterend", navRow);
+
+const btnQuizHome = document.createElement("button");
+btnQuizHome.type = "button";
+btnQuizHome.className = "quiz-home-btn";
+btnQuizHome.textContent = "⌂ 처음으로";
+$("quizCatBadge").insertAdjacentElement("afterend", btnQuizHome);
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.add("hidden"));
+  screens[name].classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ===================== 시작 화면 ===================== */
+function countByCat(key) {
+  if (key === "ALL") return QUESTIONS.length;
+  return QUESTIONS.filter(q => q.cat === key).length;
+}
+
+function renderCategories() {
+  const grid = $("categoryGrid");
+  grid.innerHTML = "";
+  Object.keys(CAT).forEach(key => {
+    const btn = document.createElement("button");
+    btn.className = "cat-btn" + (key === selectedCat ? " selected" : "");
+    btn.innerHTML = `${CAT[key]}<span class="cat-count">${countByCat(key)}문제</span>`;
+    btn.addEventListener("click", () => {
+      selectedCat = key;
+      renderCategories();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(questions, retryMode) {
+  quizSet = shuffle(questions);
+  idx = 0;
+  userAnswers = new Array(quizSet.length).fill(null);
+  wrongQuestions = [];
+  isRetryMode = !!retryMode;
+  $("quizCatBadge").textContent = isRetryMode ? "오답 복습" : CAT[selectedCat];
+  showScreen("quiz");
+  renderQuestion();
+}
+
+$("btnStart").addEventListener("click", () => {
+  const pool = selectedCat === "ALL"
+    ? QUESTIONS
+    : QUESTIONS.filter(q => q.cat === selectedCat);
+  startQuiz(pool, false);
+});
+
+/* ===================== 퀴즈 진행 ===================== */
+function renderQuestion() {
+  const q = quizSet[idx];
+  const chosen = userAnswers[idx]; // null이면 아직 안 푼 문제
+
+  $("progressText").textContent = `${idx + 1} / ${quizSet.length}`;
+  $("qTypeTag").textContent = q.type === "ox" ? "OX 퀴즈" : "객관식";
+  $("questionText").textContent = `Q${idx + 1}. ${q.q}`;
+
+  const box = $("choices");
+  box.innerHTML = "";
+  const marks = q.type === "ox" ? ["O", "X"] : ["①", "②", "③", "④"];
+  q.choices.forEach((text, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = q.type === "ox"
+      ? `<span class="choice-mark">${marks[i]}</span><span>${marks[i] === "O" ? "맞다 (O)" : "아니다 (X)"}</span>`
+      : `<span class="choice-mark">${marks[i]}</span><span>${text}</span>`;
+    if (chosen === null) {
+      btn.addEventListener("click", () => selectAnswer(i));
+    } else {
+      // 이미 푼 문제로 돌아온 경우: 채점 상태 그대로 복원
+      btn.disabled = true;
+      if (i === q.answer) btn.classList.add("correct");
+      else if (i === chosen) btn.classList.add("wrong");
+      else btn.classList.add("dimmed");
+    }
+    box.appendChild(btn);
+  });
+
+  if (chosen === null) {
+    $("feedback").className = "hidden";
+    $("feedback").innerHTML = "";
+    $("nextWrap").classList.add("hidden");
+    $("progressFill").style.width = `${(idx / quizSet.length) * 100}%`;
+  } else {
+    showFeedback(q, chosen);
+    $("progressFill").style.width = `${((idx + 1) / quizSet.length) * 100}%`;
+  }
+
+  // 첫 문제가 아니면 '이전 문제' 버튼 표시
+  btnPrev.classList.toggle("hidden", idx === 0);
+}
+
+function showFeedback(q, chosen) {
+  const isCorrect = chosen === q.answer;
+  const fb = $("feedback");
+  fb.className = "feedback " + (isCorrect ? "ok" : "no");
+  fb.innerHTML = `
+    <div class="verdict">${isCorrect ? "✅ 정답입니다!" : "❌ 오답입니다."}</div>
+    <div class="explain"><strong>해설</strong> · ${q.explain}</div>
+  `;
+  $("nextWrap").classList.remove("hidden");
+  $("btnNext").textContent = idx === quizSet.length - 1 ? "결과 보기 🏁" : "다음 문제 →";
+}
+
+function selectAnswer(choiceIdx) {
+  if (userAnswers[idx] !== null) return;
+  userAnswers[idx] = choiceIdx;
+  renderQuestion();
+}
+
+btnPrev.addEventListener("click", () => {
+  if (idx > 0) {
+    idx--;
+    renderQuestion();
+  }
+});
+
+btnQuizHome.addEventListener("click", () => {
+  const hasProgress = userAnswers.some(a => a !== null);
+  if (hasProgress && !confirm("퀴즈를 중단하고 처음 화면으로 돌아갈까요?\n현재 진행 내용은 저장되지 않습니다.")) return;
+  showScreen("start");
+});
+
+$("btnNext").addEventListener("click", () => {
+  if (idx < quizSet.length - 1) {
+    idx++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+});
+
+/* ===================== 결과 화면 ===================== */
+function showResult() {
+  const total = quizSet.length;
+  let correctCount = 0;
+  wrongQuestions = [];
+  quizSet.forEach((q, i) => {
+    if (userAnswers[i] === q.answer) correctCount++;
+    else wrongQuestions.push(q);
+  });
+  const rate = Math.round((correctCount / total) * 100);
+  const score = correctCount * POINT_PER_Q;
+
+  $("statScore").textContent = `${score}점`;
+  $("statCorrect").textContent = `${correctCount} / ${total}`;
+  $("statRate").textContent = `${rate}%`;
+
+  let emblem, msg;
+  if (rate === 100) { emblem = "🏆"; msg = "완벽합니다! 응급처치 마스터 수준이에요."; }
+  else if (rate >= 80) { emblem = "🏅"; msg = "훌륭해요! 몇 문제만 더 복습하면 완벽합니다."; }
+  else if (rate >= 60) { emblem = "💪"; msg = "기본기는 탄탄해요. 틀린 문제를 중심으로 복습해 보세요."; }
+  else { emblem = "📚"; msg = "아직 보완이 필요해요. 오답 복습으로 다시 도전해 보세요!"; }
+  $("resultEmblem").textContent = emblem;
+  $("resultMsg").textContent = msg;
+
+  // 오답 복습 버튼 / 오답 정리
+  const retryBtn = $("btnRetryWrong");
+  const wrongListEl = $("wrongList");
+  const wrongItemsEl = $("wrongItems");
+  wrongItemsEl.innerHTML = "";
+
+  if (wrongQuestions.length > 0) {
+    retryBtn.classList.remove("hidden");
+    retryBtn.textContent = `오답만 다시 풀기 (${wrongQuestions.length}문제)`;
+    wrongListEl.classList.remove("hidden");
+    wrongQuestions.forEach(q => {
+      const div = document.createElement("div");
+      div.className = "wrong-item";
+      const ans = q.type === "ox" ? q.choices[q.answer] : q.choices[q.answer];
+      div.innerHTML = `<div class="wq">${q.q}</div><div class="wa">정답: ${ans}</div>`;
+      wrongItemsEl.appendChild(div);
+    });
+  } else {
+    retryBtn.classList.add("hidden");
+    wrongListEl.classList.add("hidden");
+  }
+
+  showScreen("result");
+}
+
+$("btnRetryWrong").addEventListener("click", () => {
+  startQuiz(wrongQuestions, true);
+});
+
+$("btnRestart").addEventListener("click", () => {
+  const pool = selectedCat === "ALL"
+    ? QUESTIONS
+    : QUESTIONS.filter(q => q.cat === selectedCat);
+  startQuiz(pool, false);
+});
+
+$("btnHome").addEventListener("click", () => {
+  showScreen("start");
+});
+
+/* ===================== 초기화 ===================== */
+renderCategories();
+</script>
+</body>
+</html>
